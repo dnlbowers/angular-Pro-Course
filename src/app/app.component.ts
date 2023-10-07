@@ -1,42 +1,46 @@
-import { Component } from '@angular/core';
+import {
+  AfterViewInit, ChangeDetectorRef,
+  Component, ComponentRef,
+  ViewChild,
+  ViewContainerRef
+} from '@angular/core';
 import {User} from "./auth-form/auth-form.interface";
+import {AuthFormComponent} from "./auth-form/auth-form.component";
+import {AuthRememberComponent} from "./auth-form/auth-remember.component";
 
 @Component({
   selector: 'app-root',
   template: `
     <div>
-        <auth-form (submitted)="createUser($event)">
-            <h3>Create Account</h3>
-          <button type="submit">
-            Join us
-          </button>
-        </auth-form>
-        <auth-form (submitted)="loginUser($event)">
-            <h3>Login</h3>
-            <auth-remember 
-                (checked)="rememberUser($event)">
-            </auth-remember>
-            <button type="submit">
-              Login
-            </button>
-        </auth-form>
+        <button (click)="destroyComponent()">
+          Destroy
+        </button>
+        <div #entry></div>
     </div>
   `,
   styles: []
 })
-export class AppComponent {
-  title = 'AngularProCourse';
+export class AppComponent implements AfterViewInit {
+  componentRef: ComponentRef<AuthFormComponent> | undefined;
 
-  rememberMe: boolean = false;
+  @ViewChild('entry', {read: ViewContainerRef}) entry: ViewContainerRef | null = null;
 
-  rememberUser(remember: boolean) {
-    this.rememberMe = remember
+constructor(private cdr: ChangeDetectorRef) {}
+
+  ngAfterViewInit() {
+      this.componentRef = this.entry?.createComponent(AuthFormComponent);
+      if (this.componentRef){
+        this.componentRef.instance.title ='Create Account';
+        this.componentRef.instance.submitted.subscribe(this.loginUser);
+      }
+      this.cdr.detectChanges();
   }
-  createUser(user: User) {
-    console.log('Create Account', user);
-  }
+
+    destroyComponent(){
+      this.componentRef?.destroy()
+    }
 
   loginUser(user: User) {
-    console.log('login', user, this.rememberMe);
+    console.log('login', user);
   }
 }
