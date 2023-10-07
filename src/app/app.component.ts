@@ -16,9 +16,16 @@ import {AuthRememberComponent} from "./auth-form/auth-remember.component";
           Destroy
         </button>
         <div #entry></div>
+        <button (click)="moveComponent()">
+          Move
+        </button>
     </div>
   `,
-  styles: []
+  styles: [`
+    div {
+      flex-direction: column;
+    }
+  `]
 })
 export class AppComponent implements AfterViewInit {
   componentRef: ComponentRef<AuthFormComponent> | undefined;
@@ -28,7 +35,8 @@ export class AppComponent implements AfterViewInit {
 constructor(private cdr: ChangeDetectorRef) {}
 
   ngAfterViewInit() {
-      this.componentRef = this.entry?.createComponent(AuthFormComponent);
+    this.entry?.createComponent(AuthFormComponent)
+      this.componentRef = this.entry?.createComponent(AuthFormComponent, {index: 0});
       if (this.componentRef){
         this.componentRef.instance.title ='Create Account';
         this.componentRef.instance.submitted.subscribe(this.loginUser);
@@ -39,6 +47,12 @@ constructor(private cdr: ChangeDetectorRef) {}
     destroyComponent(){
       this.componentRef?.destroy()
     }
+
+  moveComponent() {
+    if (this.componentRef){
+      this.entry?.move(this.componentRef.hostView, 1);
+    }
+  }
 
   loginUser(user: User) {
     console.log('login', user);
